@@ -51,3 +51,4 @@ Open the browser dev tools (F12) → Console tab, and look for an error. The mos
 ## If the build still fails
 Open the build log Cloudflare links you to and read the first red error line — it's almost always more specific than the summary message. Common causes at this stage: the repo still has old files (`functions/`, a top-level `index.html`) alongside the new ones — delete those so only `public/`, `src/`, and `wrangler.jsonc` remain, since duplicate/conflicting configs are what triggered the original error.
 
+

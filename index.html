@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Word Explorers — vocabulary quiz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FFF7EA;
+    --ink:#241F38;
+    --ink-soft:#5B5470;
+    --card:#FFFFFF;
+    --line:#EDE3CE;
+    --brand:#E94F7C;
+    --brand-dark:#B93760;
+    --gold:#FFC93C;
+    --good:#1DBFA3;
+    --good-dark:#0E7A67;
+    --bad:#F45B69;
+    --bad-dark:#B72A38;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Atkinson Hyperlegible', sans-serif;
+    line-height:1.5;
+    min-height:100vh;
+  }
+  h1,h2,h3,.display{
+    font-family:'Baloo 2', sans-serif;
+    font-weight:700;
+    margin:0;
+    letter-spacing:0.2px;
+  }
+  #app{
+    max-width:760px;
+    margin:0 auto;
+    padding:28px 20px 60px;
+  }
+  button{
+    font-family:inherit;
+    cursor:pointer;
+  }
+  .topbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:24px;
+    gap:12px;
+  }
+  .brandmark{
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .brandmark .mark{
+    width:38px;height:38px;border-radius:11px;
+    background:var(--brand);
+    display:flex;align-items:center;justify-content:center;
+    color:#fff;font-family:'Baloo 2',sans-serif;font-weight:800;font-size:19px;
+    flex:none;
+  }
+  .brandmark .title{
+    font-family:'Baloo 2', sans-serif;
+    font-weight:700;
+    font-size:20px;
+    color:var(--ink);
+  }
+  .ghost-btn{
+    background:transparent;
+    border:2px solid var(--line);
+    border-radius:12px;
+    padding:9px 14px;
+    font-size:14px;
+    font-weight:700;
+    color:var(--ink-soft);
+    transition:border-color .15s, color .15s;
+  }
+  .ghost-btn:hover{border-color:var(--brand); color:var(--brand-dark);}
+
+  .hero{
+    text-align:left;
+    margin:8px 0 28px;
+  }
+  .hero h1{font-size:34px; line-height:1.15;}
+  .hero p{
+    margin:10px 0 0;
+    color:var(--ink-soft);
+    font-size:16px;
+    max-width:52ch;
+  }
+
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:14px;
+    margin-top:6px;
+  }
+  @media (max-width:560px){
+    .grid{grid-template-columns:repeat(2, 1fr);}
+  }
+  .tile{
+    border:none;
+    border-radius:18px;
+    padding:18px 14px;
+    text-align:left;
+    color:#fff;
+    display:flex;
+    flex-direction:column;
+    gap:22px;
+    min-height:108px;
+    position:relative;
+    box-shadow: 0 3px 0 rgba(0,0,0,0.14);
+    transition:transform .12s ease;
+  }
+  .tile:active{transform:translateY(2px); box-shadow:0 1px 0 rgba(0,0,0,0.14);}
+  .tile .letter{
+    font-family:'Baloo 2', sans-serif;
+    font-weight:800;
+    font-size:20px;
+    width:38px;height:38px;
+    border-radius:10px;
+    background:rgba(255,255,255,0.25);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .tile .name{
+    font-family:'Baloo 2', sans-serif;
+    font-weight:700;
+    font-size:16px;
+    line-height:1.2;
+  }
+  .tile .count{
+    font-size:12px;
+    opacity:0.85;
+    font-weight:400;
+  }
+
+  .card{
+    background:var(--card);
+    border:2px solid var(--line);
+    border-radius:20px;
+    padding:24px;
+  }
+  .section-label{
+    font-size:13px;
+    font-weight:700;
+    color:var(--ink-soft);
+    margin:0 0 10px;
+  }
+  .chiprow{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+  .chip{
+    border:2px solid var(--line);
+    background:#fff;
+    border-radius:999px;
+    padding:8px 16px;
+    font-size:14px;
+    font-weight:700;
+    color:var(--ink);
+  }
+  .chip.selected{
+    border-color:var(--subject-color, var(--brand));
+    background:var(--subject-color, var(--brand));
+    color:#fff;
+  }
+  .chip.small{padding:6px 12px; font-size:13px;}
+  .chip.empty{
+    opacity:0.35;
+    cursor:not-allowed;
+  }
+
+  .setup-row{margin-bottom:22px;}
+  .setup-row:last-child{margin-bottom:0;}
+
+  .topic-actions{
+    display:flex;
+    gap:10px;
+    margin-top:10px;
+  }
+  .textlink{
+    background:none;border:none;
+    color:var(--brand-dark);
+    font-weight:700;
+    font-size:13px;
+    padding:0;
+    text-decoration:underline;
+  }
+
+  .count-note{
+    font-size:13px;
+    color:var(--ink-soft);
+    margin-top:14px;
+  }
+
+  .cta-row{
+    margin-top:24px;
+    display:flex;
+    gap:12px;
+    align-items:center;
+  }
+  .cta{
+    border:none;
+    border-radius:14px;
+    padding:14px 22px;
+    font-family:'Baloo 2', sans-serif;
+    font-weight:700;
+    font-size:16px;
+    color:#fff;
+    background:var(--subject-color, var(--brand));
+    box-shadow:0 3px 0 rgba(0,0,0,0.18);
+  }
+  .cta:active{transform:translateY(2px); box-shadow:0 1px 0 rgba(0,0,0,0.18);}
+  .cta:disabled{
+    background:#D9D3C4;
+    box-shadow:none;
+    cursor:not-allowed;
+  }
+  .cta.secondary{
+    background:transparent;
+    color:var(--ink);
+    border:2px solid var(--line);
+    box-shadow:none;
+    padding:12px 20px;
+  }
+  .error-text{
+    color:var(--bad-dark);
+    font-size:14px;
+    font-weight:700;
+    margin-top:10px;
+  }
+
+  .loading-wrap{
+    text-align:center;
+    padding:60px 20px;
+  }
+  .spinner{
+    width:46px;height:46px;
+    border-radius:50%;
+    border:5px solid var(--line);
+    border-top-color:var(--subject-color, var(--brand));
+    margin:0 auto 18px;
+    animation:spin 0.9s linear infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .loading-wrap p{
+    font-family:'Baloo 2', sans-serif;
+    font-weight:700;
+    font-size:17px;
+  }
+
+  .quiz-top{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:22px;
+  }
+  .dots{
+    display:flex;
+    gap:6px;
+  }
+  .dot{
+    width:10px;height:10px;border-radius:50%;
+    background:var(--line);
+  }
+  .dot.done{background:var(--subject-color, var(--brand));}
+  .dot.current{
+    background:var(--subject-color, var(--brand));
+    box-shadow:0 0 0 3px rgba(0,0,0,0.06);
+  }
+  .score-pill{
+    background:var(--gold);
+    color:#5B3E00;
+    font-family:'Baloo 2', sans-serif;
+    font-weight:700;
+    font-size:14px;
+    padding:6px 14px;
+    border-radius:999px;
+  }
+
+  .quiz-word{
+    text-align:center;
+    padding:8px 0 26px;
+  }
+  .quiz-word .eyebrow{
+    font-size:13px;
+    font-weight:700;
+    color:var(--ink-soft);
+    margin-bottom:8px;
+  }
+  .quiz-word h2{
+    font-size:32px;
+    color:var(--subject-color, var(--brand));
+  }
+
+  .options{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:12px;
+  }
+  .option{
+    text-align:left;
+    border:2px solid var(--line);
+    background:#fff;
+    border-radius:14px;
+    padding:14px 16px;
+    font-size:15px;
+    color:var(--ink);
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
+  .option .badge{
+    flex:none;
+    width:26px;height:26px;
+    border-radius:8px;
+    background:var(--paper);
+    border:2px solid var(--line);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Baloo 2', sans-serif;
+    font-weight:700;
+    font-size:13px;
+    color:var(--ink-soft);
+  }
+  .option:hover:not(:disabled){border-color:var(--subject-color, var(--brand));}
+  .option:disabled{cursor:default;}
+  .option.correct{
+    border-color:var(--good-dark);
+    background:#EAFBF6;
+  }
+  .option.correct .badge{background:var(--good); border-color:var(--good-dark); color:#fff;}
+  .option.wrong{
+    border-color:var(--bad-dark);
+    background:#FEEEEF;
+  }
+  .option.wrong .badge{background:var(--bad); border-color:var(--bad-dark); color:#fff;}
+
+  .feedback{
+    margin-top:16px;
+    padding:14px 16px;
+    border-radius:14px;
+    font-size:14px;
+    font-weight:700;
+  }
+  .feedback.good{background:#EAFBF6; color:var(--good-dark);}
+  .feedback.bad{background:#FEEEEF; color:var(--bad-dark);}
+
+  .results-hero{
+    text-align:center;
+    padding:8px 0 8px;
+  }
+  .stars{
+    display:flex;
+    justify-content:center;
+    gap:8px;
+    margin:6px 0 18px;
+  }
+  .stars svg{width:38px;height:38px;}
+  .big-score{
+    font-family:'Baloo 2', sans-serif;
+    font-weight:800;
+    font-size:44px;
+    color:var(--subject-color, var(--brand));
+  }
+  .results-msg{
+    font-size:16px;
+    color:var(--ink-soft);
+    margin-top:6px;
+  }
+  .review-list{margin-top:24px;}
+  .review-item{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:12px 4px;
+    border-bottom:1px solid var(--line);
+    font-size:14px;
+    gap:12px;
+  }
+  .review-item:last-child{border-bottom:none;}
+  .review-item .w{font-weight:700;}
+  .review-item .status{
+    flex:none;
+    width:24px;height:24px;
+    border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-size:13px;
+    font-weight:700;
+    color:#fff;
+  }
+  .review-item .status.ok{background:var(--good);}
+  .review-item .status.no{background:var(--bad);}
+
+  .name-row{
+    display:flex;
+    gap:10px;
+    margin-top:22px;
+    flex-wrap:wrap;
+  }
+  .name-row input{
+    flex:1;
+    min-width:160px;
+    border:2px solid var(--line);
+    border-radius:12px;
+    padding:10px 14px;
+    font-size:15px;
+    font-family:inherit;
+  }
+  .name-row input:focus{outline:none; border-color:var(--brand);}
+  .saved-note{
+    color:var(--good-dark);
+    font-weight:700;
+    font-size:13px;
+    margin-top:8px;
+  }
+
+  .history-item{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:14px 4px;
+    border-bottom:1px solid var(--line);
+    gap:12px;
+  }
+  .history-item:last-child{border-bottom:none;}
+  .history-item .h-left{display:flex; align-items:center; gap:12px;}
+  .history-item .swatch{
+    width:34px;height:34px;border-radius:9px;flex:none;
+    display:flex;align-items:center;justify-content:center;
+    color:#fff;font-family:'Baloo 2',sans-serif;font-weight:800;font-size:15px;
+  }
+  .history-item .meta{font-size:12px; color:var(--ink-soft);}
+  .history-item .score{
+    font-family:'Baloo 2', sans-serif;
+    font-weight:700;
+    font-size:15px;
+  }
+  .empty-note{
+    color:var(--ink-soft);
+    font-size:14px;
+    padding:20px 4px;
+  }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script id="vocab-data" type="application/json">
+{"Art":{"Art history":{"Year 1":["after","before","first","impressionism","last","long ago","newer","next","older","prehistoric","second","then","when"],"Year 2":["at the same time as","century","earlier","graffiti","later","long after","long before","modern era","period","pop art","retro","since","street art","years"],"Year 3":["approximate","change","chronological","culture","during","fashion","genre","narrative art","origin","portfolio","process","realism","recently","series","still life","surrealism","trace","while"],"Year 4":["abstract","continuity","cubism","decline","former","futurist","influence","installation art","latter","minimalist","patron","phase","school","trend","uncertain","workshop"],"Year 5":["aesthetic","contemporary","context","dominate","enduring","expressionism","legacy","pointillism","post-impressionism","prior","subsequent","symbolism"],"Year 6":["baroque","mannerism","medieval","renaissance","romanticism","simultaneous","triptych"]},"Art techniques":{"Year 1":["border","brushwork","craft","drawing","model","painting","printing","trace"],"Year 2":["collage","crocheting","cross-stitch","mould","patchwork","pulp","relief object","resist","sculpture","sew","sketch","style","template"],"Year 3":["animation","artefact","carve","crop","embroider","etch","image","mixing","mosaic","pattern","perspective","plinth","process","quilt","shading","smudge","technique","tempera","weave"],"Year 4":["aperture","bleeding","engrave","exposure","film speed","fire ware","glaze","inlay","Jpeg","kiln","marbling","medium","multi-block","mural","pan","photography","pixel","resolution","silhouette","tapestry","throw","wash"],"Year 5":["fresco","monochrome","monoprint","pigment","silverpoint","warp","weft"],"Year 6":["en plein air","frottage","maquette","mordant"]},"Materials":{"Year 1":["card","crêpe paper","paint","paper","pencil","PVA glue","sugar paper","tracing paper"],"Year 2":["newsprint","papier mâché","paste","pottery","silk","textile"],"Year 3":["acrylic paint","adhesive","blotting paper","cellophane","charcoal","dye","fabric","material","Mod podge","oil paints","pastel","thread","tissue paper","watercolours","wire","wool"],"Year 4":["corrugated card","metallic card","Plaster of Paris"],"Year 5":["ceramic"],"Year 6":["calico"]},"Appreciate, evaluate, describe":{"Year 1":["colour","form","pattern","shape","space"],"Year 2":["background","cartoon","contrast","cotton","decorate","depth","foreground","ground","layer","line","medium","middle","scale"],"Year 3":["complementary","cool","hue","negative space","positive space","primary","repetition","secondary","shade","tertiary","texture","tint","tone","warm"],"Year 4":["batik","expressive","frame","gradation","horizon line","intensity","intricate","stroke","transition"],"Year 5":["porcelain","terracotta","value"],"Year 6":["chintz","harmony","mood"]},"Critique":{"Year 1":["effect","improve","share"],"Year 2":["compare","critique","experience","imagination","represents"],"Year 3":["clarify","construct","draft","function","infer","interpret","opinion","organise","purpose","redraft","theme","version"],"Year 4":["audience","characteristic","convention","develop","element","impact","principal","structure","unique"],"Year 5":["complex","component","exceptional","perspective (point of view)","simplification","sparse"],"Year 6":["attribute","authentic","characterise","concept","controversy","discern","epitomise"]},"Artwork terminology":{"Year 1":["above","anticlockwise","below","centre","direction","down","far","further","higher","near","position","underneath","up"],"Year 2":["diagonal","horizontal","landscape","left","portrait","range","reflect","right","slope","symmetrical","vertical"],"Year 3":["sketchbook"],"Year 4":["2D shape vocab","3D shape vocab","concave","convex","decrease","increase","maths language for location"],"Year 5":["angle","diagonal","rotation"],"Year 6":["concentric","cross-section","golden section","intersecting","radial"]}},"Computing":{"Algorithms and Programs":{"Year 1":["above","anticlockwise","below","centre","clockwise","coding","control","design","direction","down","instruction","position","program","robot","rule","turtle","underneath","up"],"Year 2":["bug","data","debug","diagonal","horizontal","information","left","model","object","process","reflect","right","sprite","symmetrical","vertical"],"Year 3":["algorithm","digitise","perpendicular","programming language","purpose","sequence","series","value","variables"],"Year 4":["angle","cause","characteristic","command","logical reasoning","pattern","phase","repetition","selection","simulation","structure","transition"],"Year 5":["audience","complex","deconstruct","efficiency","improve","loop","prior","protocol","subsequent"],"Year 6":["aesthetics","arithmetic operators","binary","concentric","conditional","cumulative","deterministic","functionality","interface","intersecting","radial","simultaneous","user"]},"Using IT and Digital content":{"Year 1":["app","computer","digital","gif","Google","Internet","iPad","multimedia","network","search engine","sound","tablet","web"],"Year 2":["animation","application","audio","device","disk","document","drive","edit(ing)","file","folder","hardware","hyperlink","image","presentation software","save","save-as screengrab","search","subfolder","text","tool","video","window"],"Year 3":["blog","community","content","control panel","data logger","database","digital resources","email","file extension","font","forum","icon","input","kilobyte","megabyte","meme","motor","output","post","retrieve","tab","text","URL","vlog","word processor"],"Year 4":["back up","browser","file size","download","gigabyte","Jpeg","manipulate","Mpeg","MP3","Pdf","physical","pixel","quality","resolution","search engine","USB","video conference","wav"],"Year 5":["cache","CC/BCC","cookies","driver","field","file directory","HTML","open source","permissions","recipient","reply","reply-all","send","Wikis"],"Year 6":["IP address","metadata","MIDI","terabyte","virus","VoIP services"]},"IT terminology":{"Year 1":["controls","double-click","keyboard","left-click","menu","mouse","right-click","screen","shut down","space-bar","start","swipe","touchscreen"],"Year 2":["back-space","caps-lock","close","control","delete","enter","highlight","landscape","open","password","portrait","return","select","shift","template","zoom"],"Year 3":["alignment control alt","copy","crop","cursor","cut","drag","drop","flip","import","log on","maximise","minimise","numerical","paste","rotate","screengrab","short cut","voice recognition"],"Year 4":["animation pane","control panel","pop up","publish","sensor","system"],"Year 5":["bookmarks","browser history","CPU","fibre-optic","flash drive","gateway","GPU","hard drive","hardware","hub","memory","motherboard","operating system (OS)","RAM","ROM","Router","server","software","solid state","SSD","USB stick/pen"],"Year 6":["AR (augmented reality)","concurrently","connectivity","digital art","digital music","edit","process"]},"Evaluating information":{"Year 1":["research","search"],"Year 2":["source"],"Year 3":["clarify","communication","opinion","relevance"],"Year 4":["contribution","reliability","validate"],"Year 5":["context","crucial","impact","obstacle","paraphrase","quote","rigorous","verbatim","verify"],"Year 6":["analyse","authentic","controversy","copyright","discern","plagiarism","plausible","prejudice"]},"IT safety":{"Year 2":["digital footprint","material"],"Year 3":["abuse","e-safety","online behaviour","personal data","private","public","report","social media"],"Year 4":["appropriate","consequence","inappropriate","share"],"Year 5":["identity theft","password strength"],"Year 6":["phishing"]}},"DT":{"Design":{"Year 1":["after","before","design","first/second (etc)","generate","ideas","last","next","plan","product","technology","then","when"],"Year 2":["appeal","at the same","collage","construction","criteria","earlier","fashion","function","later","model","object","overview","paste","period","process","project","purpose","relief","since","style","time as"],"Year 3":["3D projection","label","mock-up","organise","prototype","purpose","realistic","research","scale","sketch","version"],"Year 4":["audience","cross-section","cultural","exploded diagram","scale-bar"],"Year 5":["incorporate","preliminary","process","reference","sketchbook"],"Year 6":["budget","detail","explain","function","limitation","purpose","sophisticated"]},"Make":{"Year 1":["construction","cut","drawing","make","measure","painting","printing","stick","trace"],"Year 2":["axles","join","knit","levers","mechanism","sew","sliders","textile","tools","wheels"],"Year 3":["assemble","circuit","construct","digital graphics","dye","fabric","fabric paints","hemming","precision","tie-dye","weave"],"Year 4":["backstitch","blanket stitch","bulb","buzzer","finishing technique","motor","program","score","series","template","whip stitch"],"Year 5":["cam","gear","hydraulic","light emitting diode (LED)","lever","pneumatic","pulley"],"Year 6":["light dependent resistor","pin","tape"]},"Appreciate, evaluate, describe":{"Year 1":["different","effect","improve","photograph","share","similar"],"Year 2":["compare","contrast","critique","depth","describe","layer","stable","stiff","strong","suggest","views"],"Year 3":["clarify","opinion","quality"],"Year 4":["aesthetic","alter","appeal","characteristic","convention","develop","fit for purpose","impact","improvement","innovativeness","pattern piece","restart","structure","unique"],"Year 5":["constructive","feedback","reasonable","refine","sensitive","suggestion"],"Year 6":["analyse","critique","showcase"]},"Materials and tools":{"Year 1":["knife","material","metre ruler","pattern","ruler","scissors","textile"],"Year 2":["crocheting sticks","fastener","knitting needles","scales","set square","soft tape-measure"],"Year 3":["metallic tape-measure","protractor","sandpaper","screwdrivers","spirit level"],"Year 4":["adult scissors (to cut)","compass","glue gun","scissors (to score)","sewing needle","Stanley knife"],"Year 5":["chisel","hammer","mallet","nails","vice"],"Year 6":["power tools","saw"]},"Cookery":{"Year 1":["healthy","ingredients","savoury","surface","sweet"],"Year 2":["butter knife","flour","grate (carrot, cheese)","grater","hot","measure","oven","peeler (carrots, potatoes)","prepare","salt","seasoning","sieve"],"Year 3":["bake","bread","break (eggs)","combine","crush (garlic)","dough","egg","fresh","grow (plants)","mash (potato)","moist","raising agent","slice (fruit and salad)","tinned","utensil"],"Year 4":["bridge (to hold harder veg)","caught","cream (fat/sugar)","edible","frozen","grate (lemon peel)","greasy","harvested","hygienic","microwave","reared","safe","seasonal","toaster","whisk"],"Year 5":["allergy","fish slice","fold","gluten","herbs","intolerance","kneed","mix","nutrients","pour","processed","separate (egg white/yolk)","smooth","spice","texture"],"Year 6":["carbohydrate","fat","fibre","oven gloves","protein","recipe","store","sugar","vitamins","wholemeal","yeast"]},"Design Technology terminology":{"Year 1":["above","below","centre","close to","direction","down","far","further","higher","near","newer","older","position","roughly","underneath","up"],"Year 2":["components","fold","join","left","materials","range (not the maths sense)","reflect","right","roll","safety","sloped"],"Year 3":["accurate","annotate","chronological","digital","input","mechanical","mould","output","perspective","shape","structure","technique"],"Year 4":["cause","computer-aided design","consequence","continuity","former","intricate","latter","medium","phase","precision","trend","uncertain"],"Year 5":["complex","contemporary","context","dominate","enduring","exceptional","flowchart","prior","sparse","subsequent"],"Year 6":["attribute","authentic","controversy","interface","maquette","simultaneous"]},"Mathematical content":{"Year 1":["anticlockwise","table","tally"],"Year 2":["block diagrams","cm","degrees (°c)","grams","litres","nearest cm","nearest g","pictogram","scale (1s, 2s, 5s, 10s)","symmetrical","tally chart","temperature"],"Year 3":["2D shapes","angle","approximate","area","bar chart","convert","distance","estimate","length","measure","measurements","nearest 10ml","nearest 45° for angle","nearest mm","parallel","perpendicular","scales","units"],"Year 4":["3d shape vocab","concave","continuous data","convex","decrease","describe location","describe shape","discrete data","estimate angle","estimate capacity","estimate distance","estimate length","estimate mass","increase","time graphs"],"Year 5":["average","diagonal","equivalence","estimate area","estimate temperature","imperial units","median","metric","mode","nearest angle o","range","rotation","timetables"],"Year 6":["area","concentric","convert","intersecting","mean average","pie chart","radial","volume"]}},"Geography":{"Locational knowledge":{"Year 1":["Africa","Antarctic Ocean","Antarctica","Arctic Ocean","Asia","Atlantic Ocean","Australia","Belfast","Capitals","Cardiff","Continents","Edinburgh","England","Europe","flag","Indian Ocean","London","North America","Northern Ireland","Oceans","Pacific Ocean","Scotland","South America","Wales"],"Year 2":["Afro-Eurasia","Australasia","Celtic Sea","Dublin","Eire","English Channel","Eurasia","Irish Republic","Irish Sea","North Atlantic Ocean","North Sea","Oceania","Sahul","South Atlantic Ocean","Zealandia"],"Year 3":["(Greater) London","East Anglia,","East Midlands","North East","North West","South East","South West","West Midlands","Yorkshire and the Humber","Antarctic Circle","archipelago Arctic Circle","Hebrides","hemisphere","Orkney","Shetland","The Andes","tropical","tropics"],"Year 4":["autonomy","European capitals","European countries","federation","province","sovereign","state","The Alps","time zone","union"],"Year 5":["equator","latitude","longitude","North hemisphere","Prime/Greenwich Meridian","South hemisphere","Tropic of Cancer","Tropic of Capricorn"]},"Place knowledge":{"Year 1":["area","different","same"],"Year 2":["difference","similarity"],"Year 3":["case study","compare","contrast","region"],"Year 4":["trend"],"Year 5":["erosion"]},"Human geography":{"Year 1":["abroad","capital","city","country","factory","farm","house","journey","seaside","shop","town","village","weekend"],"Year 2":["harbour","litter","office","pollution","port","school"],"Year 3":["administration","authority","borough","canal","community","council","culture","district","dock","economy","energy","farming","function","government","international","locality","lock","minerals","municipality national","navigation","Panama Canal","renewable","settlement","Suez Canal","waterway"],"Year 4":["arable farming","carrying capacity","contiguous","economic activity","employment","finance","industrial","infrastructure","land use","mixed farming","municipal","pastoral farming","retail","statistics","trade links"],"Year 5":["commercial farming","deforestation","distribution","eco-tourism","export","fair trade","import","mechanisation","migration","pollution","trade","transport","unsustainable"],"Year 6":["clean energy","construction","demographic","economy","fossil fuels","hydro-electric power","power plant","rural","urban","zone/sphere of influence"]},"Physical geography":{"Year 1":["beach","cliff","coast","cold","continent","desert","forest","hill","hot","mountain","ocean","rain","river","sea","soil","tide","valley","wind","weather"],"Year 2":["bay","channel","daily","equator","estuary","island","monthly","peninsula","poles","seasonal","temperature","vegetation","weekly"],"Year 3":["characteristic","climate","climate zones","desert","estuary","forest","grassland","ice sheet","mountain ranges","natural resources","peninsula","savannah","source","temperate","tropical","tundra","vegetation belts"],"Year 4":["active","altitude","anemometer","ash","barometer","catastrophe","biome","dormant","earthquake","environmental","epicentre","eruption","explosion","extinct","fault lines","focus","geology","lava","magma chamber","mantel","plates","region","Richter scale","tectonic","tsunami","vegetation","volcanic","volcano","zenith"],"Year 5":["biodiversity","canopy","cave","cliff","climate zone","column","eco-system","erosion","logging","precipitation","seasonal","stack","stock","topography","understorey","wave"],"Year 6":["canyon","climate change","confluence","delta","deposition","global warming","gorge","greenhouse effect","greenhouse gasses","lower course","meander","mid-course","Ox-bow lake","riverbed","river mouth","tributary","U-shaped valley","upper course","V-shaped valley","waterfall"]},"Geographical skills and fieldwork":{"Year 1":["compass","compass point","direction","East","Map","North","photograph","South","West"],"Year 2":["atlas","beyond","contains","environment","further","furthest","higher","key","landmark","left","lower","map","OS maps","plan","right","route","scale","sketch","surroundings","symbol"],"Year 3":["area","atlas","contour","globe","grid reference","North-East","North-West","population","South-East","South-West","square km","square miles"],"Year 4":["atlas contents and index","classify","contour lines","property","sort"],"Year 5":["6 figure grid reference","computer mapping","digital mapping","scale"],"Year 6":["16-point compass","complex keys","distribution maps","NNE ENE ESE etc","thematic maps"]},"Mathematical content":{"Year 1":["above","anti-clockwise","below","centre","clockwise","close to","direction","down","equal to","far","further","group","guess","half","half turn","high(er)","journey","larger","least","less than","month","more than","most","near","nearly","new(er)","old(er)","position","quarter turn","roughly","share","smaller","underneath","up","whole","year"],"Year 2":["calculate","capacity","compare","exact(ly)","fractions","mass","measuring","nearest","order","rank","represents","round","scale","set square","stands for","symbol","thermometer","value","volume","weight"],"Year 3":["acute angle","amount","approximate","approximately","billion","cell","column","coordinates","corresponding","data","degrees","easting","equivalent","estimate","expensive","million","negative","northing","obtuse angle","parallel","positive","remainder","round down","round up","row","worth"],"Year 4":["base","concave","construct","convex","cylindrical","decrease","factor","increase","interpret","negative numbers","origin","plot","protractor","quadrant","questionnaire","reflect","rotation","sketch,","spherical","survey","symmetrical","translation"],"Year 5":["arrive","average","bar chart","depart","diagonal","imperial units","inch","line chart","line graph","maximum","million","minimum","mode","outcome","percentage","pint","pound","prime","protractor","range","reflex angle","rotation symmetry","statistics","timetable"],"Year 6":["accuracy","appropriate","arc","circumference","common denominator","common factor","concentric","cross-section","determine","diameter","four quadrants","intersecting","mean","plane","proportion","quantities","radius","ratio","recurring","scale"]},"Science content":{"Year 1":["autumn","hear","season","see","sight","smell","spring","summer","winter"],"Year 2":["artificial","food chain","food web","habitat","life cycle","material","natural"],"Year 3":["crystals","fossil","heat","igneous","metamorphic","organic","pressure","rock","sedimentary","soil"],"Year 4":["condensation","evaporation","impact","minerals","pollution","precipitation","settlement","sewage","sound pollution","waste","water cycle"],"Year 5":["force","friction","gravity"],"Year 6":["adaptation","evolution","survival of the fittest"]}},"History":{"Chronology":{"Year 1":["after","around the time of…","before","days","first/second (etc)","last","long ago","months","next","now","past","prehistoric","present","then","very old","when","yesterday"],"Year 2":["at the same time (as)","BC/AD","before I was born","CE/BCE","century","chronological order","earlier","era","later","long after","long before","period","since","when grandparents were young","years (dating system)"],"Year 3":["age","approximate","change","chronological","dates","during","event","millennium","more recently","originate","process","several (years)","timeline","trace","while"],"Year 4":["abrupt","accurate","cause","consequence","continuity","decline","former","latter","occasion","phase","seldom","trend","uncertain"],"Year 5":["contemporary","context","diminish","dominate","enduring","epoch","inevitable","legacy","prior","subsequent"],"Year 6":["cumulative","decontextualise","simultaneous"]},"Historical concepts":{"Year 1":["celebrate","famous","king","queen","succession","transport"],"Year 2":["ally","ancestor","conquer","defeat","democracy","empire","enemy","pioneer","victory","withdraw"],"Year 3":["ancient","civilisation","combat","exile","govern","government","invade","majority","navigate","reign","republic","rule","voyage"],"Year 4":["abolish","aristocracy","crusade","culture","descendant","dictated","dynasty","heritage","monarchy","monotheistic","polytheistic","principal","revolution"],"Year 5":["conservative","crime","employ","influence","mass","neutrality","progressive","propaganda","punishment","suffrage","terrain","transport","weaponry"],"Year 6":["civic","economy","hierarchy","mono-cultural","multi-cultural","persecute","prejudice","revenue","succumb"]},"Historical language":{"Year 1":["artefact","compare","comparison","curator","event","fiction","museum","non-fiction","past","photograph","research","sequence","source","story","tradition"],"Year 2":["archaeologist","connection","difference","document","events","excavate","people","places","recording","represent","similarity","strategy","technology","unearth","ways of life"],"Year 3":["clarify","construct","epic","equivalent","folklore","historian","infer","interpret","introduce","myth","legend","narrate","necessary","opinion","organise","population primary source","rural","saga","secondary source","survive","theme","theory","tribe","urban","version"],"Year 4":["alternative","ardent","assume","campaign","characteristic","contrast","conventional","critique","develop","eventful","intricate","reliability","structure","summarise","transition","trivial","typical","unique","valid"],"Year 5":["abundant","capacity","complex","crucial","exceptional","futile","generalise","hypothesise","impact","inform","obstacle","perspective","phenomenon","pivotal","rigorous","sparse","surpass","sustain","unintelligible","verify"],"Year 6":["analyse","appropriate","attribute","authentic","bias","characterise","controversy","corroborate","demographic","discern","doctrine","epitomise","extrapolate","paraphrase","plausible","robust","stance","tertiary"]}},"Maths":{"Number and place value":{"Year 1":["backwards","digit","even","exchange","fewer","first…second…","forwards","half-way between","least","most","number line","number square","number track","numbers to 100 (and beyond)","odd","ones","repeating pattern","roughly","‘teens’ number","tens","units"],"Year 2":["> and <","consecutive","continue","exact","exactly","hundreds","nearest","numeral","one- digit number","partition","place, place value","predict","represents","round","rule","sequence","stands for","thousand","three-digit number","twenty-first, twenty-second….","two-digit number","value"],"Year 3":["approximate","approximately","estimate","near double","one hundred less","one hundred more","place holder","relationship","round down","round up","zero to thousand+"],"Year 4":["above zero","below zero","classify","consecutive","hundred thousand","integer","minus","negative integer","negative number","next","numeral","one thousand less","one thousand more","positive integer","positive number","property","round to the nearest 10","round to the nearest 100","round to the nearest 1000","sort","ten thousand","thousands"],"Year 5":["≈ is approximately equal to","approximation","ascending order","composite number","cube","cubed number","descending order","greater than or equal to ≥","less than or equal to ≤","million","one squared, two squared etc","prime number","Roman numerals to 1000 (M)","round to the nearest 10000","round to the nearest 100000","square/d number","term-to-term rule","to the power of…"],"Year 6":["factorise","numbers to ten million+","recurring"]},"Addition and subtraction":{"Year 1":["add","difference between","equal to","how much less is…?","less than","minus","more than","number bond","number fact","no. sentence","operation","plus","put together","sign","subtract","take away","total"],"Year 2":["addition","calculate","calculation","correct","difference","inverse","one hundred less","one hundred more","subtraction","sum","symbol","tens boundary"],"Year 3":["column(ar) addition","column(ar) subtraction","equation","exchange","hundreds boundary","inverse operation"],"Year 4":["decrease","increase"],"Year 5":["tenths boundary","units boundary"],"Year 6":["brackets","common multiple","long division","long multiplication","order of operations - BODMAS","quotient","recurring decimal"]},"Multiplication and division":{"Year 1":["array","count on (2s, 5s, 10s)","equal to","group","grouping","multiple","share","sharing"],"Year 2":["lots of","groups of","x times","multiply","multiplied by","multiplication","multiple of","product","twice","as big as","as long as","as wide as","repeated addition","row","column","share equally","group in pairs","equal groups of","÷ divide","divided by","divided into","division","inverse"],"Year 3":["equation","inverse operation","remainder"],"Year 4":["divisible by","factor","factor pair"],"Year 5":["common factor","divisibility","divisor","factorise","prime factor"]},"Fractions":{"Year 1":["fraction","half","halve","quarter","whole"],"Year 2":["equal parts","four quarters","fraction","one half","one quarter","one third","one whole","part","three quarters","two halves","two quarters"],"Year 3":["denominator","numerator","one tenth","tenths","three thirds","two thirds"],"Year 4":["decimal","decimal fraction","decimal place","decimal point","eighth","fifth","for every","hundredth","in every","proportion","simplify","sixth","twentieth"],"Year 5":["cancel","common fraction","improper fraction","mixed fraction","mixed number","ninth","per cent %","percentage","proper fraction","reduced to","simple fraction","thousandth","twelfth","vulgar fraction"],"Year 6":["common denominator","rational number","thousandth"]},"Measurement":{"Year 1":["capacity","container","fast","faster","fastest","height","length","line","mass","metre","metre stick","roughly","ruler","volume","weighing scale","weight","width","always","autumn","half past","how long ago…?","how long will it be to…?","how long will it take to…?","how often…?","midnight","month","never","once","sometimes","spring","summer","twice","usually","weekend","winter","year","names of coins"],"Year 2":["about","capacity","Centigrade °C","centimetre (cm)","contains","further","furthest","gram (g)","half-kilogram","half-litre","kilogram (kg)","litre (l)","m to represent metre","mass","measuring scale","millilitre (ml)","tape measure","temperature","thermometer","volume","weight","analogue clock","digital clock","fortnight","January, February…December","minute","quarter past","quarter to","second","£ and p","bought","change","note (and the names of notes)","sold"],"Year 3":["approximately","distance apart","distance between","distance from","distance to","kilometre (km)","mile","millimetre (mm)","perimeter","amount","least expensive","less expensive","more expensive","most expensive","value","worth","Roman numerals I to XII","12-hour clock","24-hour clock","am","calendar","century","date","earliest","latest","leap year","noon","pm"],"Year 4":["area","breadth","convert","measurement","measuring cylinder","metric unit","pint","square centimetre (cm²)","square metre (m²)","standard unit","date of birth","millennium"],"Year 5":["gallon","imperial unit","inch","pint","pound (lb)","square millimetre (mm²)","volume in cm³","arrive","depart","currency","discount"],"Year 6":["centilitre (cl)","cubic kilometre km³","cubic metre m³","cubic millimetre mm³","feet","foot","miles per hour","ounce (oz)","tonne","yard","loss","profit"]},"Properties of shapes":{"Year 1":["cuboid","cylinder","point","pointed","set","sort"],"Year 2":["2D","3D","circular","edge","hexagon","horizontal","kite","line of symmetry","mirror line","oblong","octagon","pentagon","polygon","prism","property","quadrilateral","rectangular","reflection","surface","triangular","vertex","vertical","vertices"],"Year 3":["acute angle","angle","greater angle than…","hemisphere","hexagonal","irregular","non-symmetrical","obtuse angle","octagonal","parallel","pentagonal","perpendicular","polyhedron","regular","right angle","right-angled triangle","semi-circle","smaller angle than…"],"Year 4":["base","closed","concave","construct","convex","cylindrical","equilateral triangle","heptagon","isosceles triangle","line symmetry","open","parallelogram","polygon","polyhedron","reflect","rhombus","scalene triangle","sketch","spherical","square-based","tetrahedron","trapezium"],"Year 5":["angle(s) at a point","angle(s) on a straight line","axis of symmetry","congruent","degrees","diagonal","octahedron","reflective symmetry","reflex angle"],"Year 6":["arc","circumference","concentric","cross-section","diameter","dodecahedron","geometric","icosahedron","intersecting","intersection","kite","net","plane","radius","tangram","vertically opposite angles"]},"Position and direction":{"Year 1":["anti-clockwise","centre","clockwise","direction","half turn","journey","position","quarter turn","three-quarter turn","turn","underneath","whole turn"],"Year 2":["compass point","east","higher","lower","map","north","NSEW","plan","route","south","straight line","west"],"Year 4":["angle measurer","compasses","coordinates","degree","first quadrant","NE, NW, SE, SW","north-east","north-west","origin","plot","rotate","set square","south-east","south-west","translation"],"Year 5":["protractor","rotation symmetry"],"Year 6":["four quadrants"]},"Statistics":{"Year 2":["block diagram","category","column","diagram","label","least common","least popular","most common","most popular","pictogram","represent","row","scale","table","tally","tally chart","title"],"Year 3":["axes","axis","bar chart","Carroll diagram","chart","column","data","frequency table","grid","interval","row","Venn diagram"],"Year 4":["interpret","questionnaire","survey","time graph"],"Year 5":["bar line chart","database","line graph","maximum","minimum","mode","outcome","range","timetable","value","x-axis","y-axis"],"Year 6":["average","distribution","mean","median","pie chart","rate","sample","statistics"]},"Algebra":{"Year 6":["algebra","algebraic","equation","equivalent expression","evaluate","expression","formula","formulae","symbol","unknown","variable"]},"Ratio and proportion":{"Year 6":["comparison","proportion","quantities","ratio","scale","scale factor"]}},"Music":{"Musical structure":{"Year 1":["album","bridge (not guitar)","chorus","cover","demo","ensemble","single","solo","verse"],"Year 2":["appreciation","call and response","compose","ensemble","fanfare","hook","lip syncing","opera","orchestra","solo","symphony","walking bass"],"Year 3":["a cappella","cadence","coda","concerto","fast","improvise","jam","mass","motif","movement","slow","sonata"],"Year 4":["allegro","cadenza","cantata","chorale","largo","oratorio","poem","scherzo","suite","tempo","tone","vivace"],"Year 5":["discordant","dissonance","gavotte","minuet and trio","resolution"],"Year 6":["anticipation","antiphony","glissando","hemiola","syncopation"]},"Musical notation":{"Year 1":["beat","clap","loud","notes","quiet","rhythm (spoken)","soft","tune"],"Year 2":["crotchet","double-time","harmony","melody","minim","pitch","quaver","rest","rhythm","scale","unison","volume"],"Year 3":["accent","chord","clef","composition","dynamics","flat","key","major","minor","notation","octave","semibreve","semiquaver","semitone","sharp","slur","staff","stave","tone"],"Year 4":["bar","capo (for guitar)","crescendo","decrescendo","diminuendo","forte","notation","piano","stop time","tab","tag"],"Year 5":["fortissimo","legato","mezzo forte/piano","pianissimo","slur","staccato"],"Year 6":["cross-rhythm","downbeat","off-beat","swing","upbeat"]},"Musical instrumentation":{"Year 1":["accompaniment","drone","instrument","sing","triangle","voice"],"Year 2":["backing vocal","band","choir","chorus (ensemble)","drum kit","ensemble","guitar","keyboard","lead guitar","lead vocal","orchestra","synth"],"Year 3":["amplifier","backbeat","bass","brass","conductor","feedback","orchestral sections","percussion","pitch bending","riff","slapping bass","soloist","strings","timpani","wind","woodwind"],"Year 4":["acoustic guitar","alto","baritone","classical guitar","electric guitar","falsetto","harpsichord","instrumentation","organ","piano","soprano","texture","timbre","tone","tonic","vibrato"],"Year 5":["bassoon","cello","clarinet","cymbal","double bass","flute","French horn","glockenspiel","harp","kettle drum","oboe","saxophone","trombone","trumpet","tuba","viola","violin","xylophone"],"Year 6":["bass","bass recorder","clarinet","contra-bassoon","cornet","descant recorder","euphonium","flute","lute","piccolo","tenor recorder","treble recorder","viol"]},"Musical history":{"Year 1":["newer","older"],"Year 2":["century","modern","period","pop","retro"],"Year 3":["chronological","classical","culture","fashion","genre","jazz","origin","process","recent","rock and roll","series","theme"],"Year 4":["continuity","decline","former","geographical","historical","influence","latter","patron","phase","school","trend"],"Year 5":["atonal","contemporary","context","dominate","enduring","legacy","prior","subsequent"],"Year 6":["baroque","classical","medieval","renaissance","romantic","simultaneous"]},"Technology":{"Year 3":["audio","automated","edit","experiment","software"],"Year 4":["create","mix","tracks"],"Year 5":["complement","video"]}},"PE":{"Position":{"Year 1":["above","anti-clockwise","area","backward","below","centre","clockwise","close to","corner","direction","distance","far","first…second (etc)","forward","further","group","guess","half","half turn","higher","larger","last","least","less","long","longer","more","most","near","object","own space","point","position","quarter turn","short","sideways","smaller","underneath","whole"],"Year 2":["beyond","compare","height","left","order","rank","right"],"Year 3":["cross","cross court","down the line","estimate","left","parallel","right","square","tie"],"Year 5":["average","distribution","range","rating","seed"],"Year 6":["circumference","diameter","intersecting","perimeter"]},"Location":{"Year 1":["court","field","floor (of a pool)","lane","pitch","poolside","racetrack","ring","track"],"Year 2":["environment","obstacle","surroundings","target"],"Year 3":["arena","crease","green","region","stadium","wicket"],"Year 4":["base","incline","origin","zone"],"Year 5":["starting blocks","velodrome"]},"Time":{"Year 1":["after","before","event","next","now","seconds","then","when","whistle"],"Year 2":["earlier","hold","later","period","session","since"],"Year 3":["approximate","preparation","process","recovery","repetition","several"],"Year 4":["abrupt","continuity","continuous","decrease","former","increase","latter","occasion","phase"],"Year 5":["context","dominate","enduring"],"Year 6":["cumulative","simultaneous"]},"Shape and movement":{"Year 1":["backward roll","balance","bounce","catch","cool down","forward roll","handstand","hit","jog","jump","kick","land","one-handed","overarm","press-up","pull-up","race","rhythm","run","sit-up","skip","speed","spin","sprint","squat","star jumps","stretch","throw","travel","twist","two-handed","underarm","walk","warm-up"],"Year 2":["arch","bridge","cartwheel","control","lunge","lunge kick","rhythm","route","sidestep","space","split","stationary","strike","symmetrical","tuck","tumble"],"Year 3":["assist","backhand","backstep","dynamics","extended","footwork","force","forehand","function","game","hollow","lob","match","match point","muscle","navigate","pace","peak","rally","receive","rotate","sequence","serve","set","shot","straddle","volley"],"Year 4":["accelerate","agility","bridge walk","demonstrate","endurance","intensity","non-dominant","receive","spin","tuck roll"],"Year 5":["backspin","friction","maximum","minimum","outcome","resistance","rigorous","scull","sidespin","topspin","velocity"],"Year 6":["aerobic","anaerobic","anticipate","movement"]},"Teamwork and behaviour":{"Year 1":["background","behaviour","challenge","choice","disabled","dream","enjoy","feeling","group","idea","imagination","impression","manners","persevere","polite","resilience","rule setting","team","tradition"],"Year 2":["action","bullying","cooperate","creative","disability","enjoyment","environment","feedback","focus","gender","guideline","opinion","persistence","respect","responsibilities","rights","strategy","surroundings","tactics","worry"],"Year 3":["achieve","adjust","ambition","antisocial","appreciate","climate","collaborate","compete","concern","confidence","conflict","consequence","contribute","creativity","criticise","discrimination","minority","negative","positive","principle","principles","reflect","resolve","self-confidence","sensitive"],"Year 4":["aspiration","characteristic","code","consider","constructive","critique","empathy","ethic","evaluate","integrity","intense","mindfulness","modify","perseverance","personal quality","recognize","resilience","self-worth","sensitivity","sympathy","tolerance","tolerate","typical","verbalise"],"Year 5":["aesthetic","compassion","compensate","considerate","crucial","effective","inform","perspective","pivotal"],"Year 6":["analyse","bias","characterise","concept","controversy","dilemma","epitomise","facilitate","prejudice","values"]},"Sports":{"Year 1":["adventure sports","athletics","ball","ball sports","baseball","basket","basketball","bat","bike","block","boxing","chess","climbing","cricket","cycle","dance","diving","football","gymnastics","hoop","horse racing","medal","motor sports","motorbike","mountain sports","net","Olympics","Paralympics","player","point","racer","racket","rafting","record","rounders","rowing","rugby","run","sailing","score","shooting","skiing","snooker","swimmer","sword-fighting","table tennis","tennis","trampoline","umpire","water sports","weightlifting","wrestling"],"Year 2":["archery","card games (snap)","cards","catcher","coach","competition","cross-country","deck","defeat","dominoes","extreme sports","golf","high jump","judo","karate","kart racing","long jump","mind sports","parkour","pitcher","play","pocket","relay","skateboarding","snowboarding","stick","summer sports","surfing","tournament","trainer","victory","winter sports"],"Year 3":["American football","aquatic sports","baton","canoeing","checkers","club","cue","darts","draughts","draw","fixture","Formula 1","Grand Prix","hiking","hockey","ice hockey","invasion games","kayaking","leisure","long jump","marathon","paddle","parachuting","pool","puck","racquet","scuba diving","synchronised swimming","triathlon","volleyball","water polo"],"Year 4":["abseil","badminton","blade","body-building","body-boarding","chop","dodgeball","drive","drop","fencing","flick","gliding","hurdle","javelin","kick-boxing","kitesurfing","Kung Fu","orienteering","paragliding","parasailing","pole vault","pool","race-walking","skydiving","smash","snorkelling","speed-walking","squash","Sumo","Taekwondo","triple jump","windsurfing"],"Year 5":["bowls","discus","hammer","shot put","slalom"],"Year 6":["biathlon","billiards","bobsleigh","curling","decathlon","dressage","equestrian","figure skating","heptathlon","hurling","lacrosse","pentathlon","polo","steeplechase"]},"Football and games":{"Year 1":["attacker","box","centre spot","corner","defender","dribble","goal","goal area","penalty area","linesman","man-on","mark","midfield","pass","pitch","referee","shoot","throw in"],"Year 2":["back pass","cross","foul","free kick","goal kick","hand ball","header","kick off","penalty kick","penalty spot","possession","receive","red card","spot kick","yellow card"],"Year 3":["18-yard box","6-yard box","bend","brace","chip shot","clean sheet","double","goal-keeper","goalie","hat-trick","obstruction","off-side","position","striker","treble","winger"],"Year 4":["campaign","dive","far post","near post","sliding tackle"],"Year 5":["nutmeg"]},"Dance":{"Year 1":["ballet","beat","loud","notes","performance","piece","quiet","soft","tune"],"Year 2":["call and response","chorus","compose","counts","ensemble","harmony","hip-hop","melody","relationships","scale","solo","street dance","tap","unison"],"Year 3":["ballroom","cadence","canon","coda","flow","improvise","motif","movement","phrase","soloist","space","stimulus","technique","theme","time","unison","weight"],"Year 4":["Bhangra","choreography","contemporary","convention","crescendo","improvisation","Latin","reproduce","structure","tempo"],"Year 6":["anticipation","cross-rhythm","downbeat","off-beat","swing","syncopation","upbeat"]},"Swimming":{"Year 2":["backstroke","breaststroke","deep","depth","float (verb and noun)","front crawl","glide","push","self-rescue","stroke","submerge"],"Year 3":["log roll","pike","tread water","tuck float"]}},"RE":{"Chronology":{"Year 1":["after","before","days of the week","first…second (etc)","last","long ago","months of the year","next","now","then","when","yesterday"],"Year 2":["at the same time","BC/AD","CE/BCE","century","earlier","later","long after","long before","period","since","years"],"Year 3":["age","approximate","chronological","during","millennium","more recently","originate","repetition","several (years)","trace","while"],"Year 4":["occasion","former","latter","phase","continuity"],"Year 5":["contemporary","context","diminish","enduring","legacy","prior"],"Year 6":["cumulative","simultaneous"]},"Discussion":{"Year 1":["artefact","effect","equal to","group","larger","least","most","non-fiction","research","share","smaller"],"Year 2":["compare","difference","document","experience","imagination","order","rank","represents","sculpture","similarity","stands for","value"],"Year 3":["aspect","clarify","equivalent","function","infer","interpret","introduce","opinion","organise","primary source","purpose","secondary source","theme","theory","version"],"Year 4":["alternative","assume","characteristic","contrast","critique","develop","heritage","impact","prosper","reliability","summarise","typical","uncertain","unique"],"Year 5":["component","crucial","impact","inform","pivotal","rigorous","simplification","verify"],"Year 6":["analyse","appropriate","attribute","authentic","bias","corroborate","decontextualise","demographic","discern","medieval","paraphrase","plausible","prejudice","renaissance","robust","tertiary","triptych"]},"Doctrine, theology and faith":{"Year 1":["amen","angel","faith","festival","holy","object","prayer","priest","religious","service","temple","tradition","wedding","worship"],"Year 2":["ceremony","convert","eternal","fast","funeral","hymn","marriage","martyr","sacrifice","truth"],"Year 3":["agnostic","alms","atheist","atone","chant","charity","community","confess","culture","denomination","legend","myth","relic","ritual","shrine","supreme","symbol"],"Year 4":["ardent","conventional","monotheistic","polytheistic","principal","pulpit","sacred","sanctuary","secular","sombre","spiritual","structure","transition"],"Year 5":["blasphemy","complex","conservative","cult","dogma","evangelical","heresy","heterodox","liberal","orthodox","perspective","progressive","sect","shaman"],"Year 6":["Animism","concept","controversy","crusade","deity","doctrine","extremist","fanatical","fundamentalist","hierarchy","Jain","Jihad","Mormon","Neopagan","Pagan","Shintoism","stance","Taoism","tenet","theocracy","theology","Voodoo","Wiccan","Zoroastrianism"]},"Buddhism":{"Year 4":["Bo tree","Buddha","dharma wheel","eightfold","enlightenment","lotus","meditation","mindfulness","Nepal","Tipitaka"],"Year 5":["Dalai Lama","mantra","nirvana","puja","saffron","Tibet","Wesak","yoga"],"Year 6":["bodhisattvas","Mahayana","Theravada","vihara","zen"]},"Sikhism":{"Year 4":["gurdwara","Guru","Kaur","khanda","langar","Nanak","Punjab","Singh","turban","Vaisakhi"],"Year 5":["Guru Granth Sahib","gurpurbs","Khalsa","5 Ks","Kesh","Kangha","Kara","Kirpan","Kaccha"],"Year 6":["Nirankari","Namdhari","henna"]}},"Science":{"Working scientifically":{"Year 1":["above","answer","area (non-maths meaning)","below","centre","clockwise","close to","different","direction","distant","down","equal to","event","far","further","group","half","high(er)","larger","least","less than","low(er)","more than","most","near","nearly","new(er)","non-fiction","old(er)","pattern","point","position","question","research","roughly","same","smaller","underneath","up","whole"],"Year 2":["amount","appearance","beyond","contains","difference","distance","document","exact","exactly","fair test","fractions","left","nearest","property","represents","right","scale","similarity","stands for","strategy","symmetrical"],"Year 3":["acute","approximate","approximately","area (maths meaning)","case study","corresponding","data","data logger","degrees","down","equivalent","evidence","fact","group","hypothesis","impact","necessary","negative","obstacle","obtuse","opinion","outcome","parallel","positive","primary source","quantity","relationship","remainder","round","secondary source","theory","up"],"Year 4":["3D shape terminology","accurate","base","comparative","concave","convention","convex","cylindrical","decrease","exception","factor","increase","intricate","negative numbers","origin","precise","reliability","rotation","spherical","statistics","systematic","translation","trend","typical","unique"],"Year 5":["abundant","cancel out","capacity","causal","complex","control","correlate","crucial","dependent","diagonal","distribution","exceptional","imperial units","maximum","million","minimum","percentage","perspective","phenomenon","reflex angle","rigorous","rotation","sparse","sustain","variable"],"Year 6":["appropriate accuracy","arc","authentic","bias","circumference","concentric","controversy","cross-section","degree of trust","diameter","intersecting","plane","plausible","proportion","radius","ratio","recurring","robust","stance","tertiary source"]},"Presentation":{"Year 1":["list","notes","sketch","table","tally","template"],"Year 2":["block diagram","jottings plan","pictogram","record","recording","tally chart","Venn diagram"],"Year 3":["abbreviations","bar charts","Carroll diagram","column","database","flow chart","frequency table","grid","present findings","row","subdivisions"],"Year 4":["communicate","continuous data","discrete data","format","grouped data","line graphs","plot","qualitative","quantitative","time graphs"],"Year 5":["average","line graph","mode","range","scatter graph"],"Year 6":["four quadrants","mean","pie charts"]},"Skills":{"Year 1":["explore","feel","guess","hear","see","senses","sight","smell","test","touch"],"Year 2":["collect","conclude","contrast","describe","gather","link","notice","order","predict","rank","result","sort","value"],"Year 3":["assume","clarify","compare","disprove","estimate","identify","infer","interpret","introduce","observe","organise"],"Year 4":["categorise","classify","critique","hypothesise","summarise"],"Year 5":["generalise","inform thinking","refute","verify"],"Year 6":["analyse","attribute","characterise","corroborate","determine","discern","epitomise","extrapolate"]},"Equipment":{"Year 1":["beaker","clock","egg timer","magnifying glass","metre stick","mirror","ruler","scissors","tape measure","timer"],"Year 2":["beaker","equipment","insect viewer","measuring scales","net","pipette","pooter","set square","stop-watch","syringe","thermometer","tube","tweezers","weight"],"Year 3":["apparatus","compass","cork stopper","gauze","hand lens","hourglass","measuring cylinder","microscope","petri dish","protractor","test-tube"],"Year 4":["aquarium","forceps","pipette"],"Year 5":["filter","funnel","paper","sieve"]},"Plants":{"Year 1":["berry","blossom","branch","buds","bulb","flower","food","fruit","leaf/leaves","petal","root","seed","soil","stalk","stem","trunk"],"Year 2":["earth (soil)","function","germinate","growth","healthy","mature","nutrients","pollination","seed dispersal","seedling","shoot","structure","vegetation","wither"],"Year 3":["absorb","anther","carpel","fertiliser","filament","ovary","ovule","pollen","pollination","seed formation","sepal","stamen","stigma","style","transported"],"Year 4":["deciduous","evergreen","flowering plants","garden plants","grasses","non-flowering plants","plant groups","pores","trees","wild"],"Year 5":["clone","plantlets","runners","seed formation","transpiration"]},"Animals, including humans":{"Year 1":["animal","baby","beak","bird","claw","cub","egg","eyes","family","feather","fin","fish","fur","mouth","neck","nest","nocturnal","pets","pup","reptile","scales","tail","tame","teeth","wild","wing"],"Year 2":["adult","amphibian","bones","brain","child","develop","ear lobe","eyebrows","heart","insect","live young","lungs","mammal","off-spring","skeleton","teenager","toddler","wrist","young"],"Year 3":["adulthood","artery","babyhood","backbone","bones","brain","childhood","contraction","heart","invertebrates","joints","muscles","offspring","ribs","skull","sockets","spine","survival","tendons","vein","vertebrates","windpipe"],"Year 4":["anus","breakdown","chemical","digestion","digestive system","endoskeleton","excrete","exoskeleton","faeces","gastric juices","large intestine","oesophagus","reabsorb","reabsorption","rectum","saliva","salivary gland","sewage","small intestine","stomach"],"Year 5":["arachnid","birth","chromosomes","crustacean","embryo","fallopian tubes","fertilisation","gestation","infancy","mollusc","ovary","ovum","placenta","sponge","uterus","zygote"],"Year 6":["aerobic","air sacs","alveoli","aorta","artery","blood vessels","bronchi","bronchioles","capillaries","carbon dioxide","circulatory system","clotting","deoxygenated","diaphragm","gaseous exchange","haemoglobin","oxygenated","plasma","pulmonary","red blood cells","respiratory system","respire","trachea","vein","ventricles","white blood cells"]},"Habitats":{"Year 1":["alive","breathe","dead","feed","grow","living","meat eater","move","plant feeder","shelter","within"],"Year 2":["adapted","conditions","damp","dark","dinosaur","environment","food chain","food source","habitat","indigenous","life cycle","log","microhabitat","microscopic","pond","predator","prey","produce","reproduce","suited","surroundings","variety","woodland"],"Year 3":["Antarctic Circle","Arctic Circle","carnivore","characteristics","climate","climate zones","consumer","desert","food web","forest","grassland","herbivore","life process","omnivore","population","producer","soil","survive","temperate","tropical","tundra","vegetation"],"Year 4":["anemometer","barometer","biome","classification","deforestation","dominant","environmental","fungus/fungi","invertebrates","key","mould","organism","pollution","population","region","variation","vertebrates"],"Year 5":["asexual reproduction","erosion","interdependence","sexual reproduction","topography"],"Year 6":["microbes","microorganism","organism"]},"Healthy living":{"Year 1":["emotions","exercise","fish","meat","salt(y)","sugar","sweet","taste","water"],"Year 2":["activity","balanced diet","beans","dairy","fat","fruit","germ","grains","heart rate","lifestyle","medicine","nuts","pulse","seafood","starch","sugar","vegetable"],"Year 3":["bacteria","carbohydrate","dietary","fibre","food groups","hydrated","hygiene","infection","minerals","nutrition","protection","protein","starches","virus","x-ray"],"Year 4":["canines","cavities","decay","dentin","enamel","fluoride","gums","incisors","molars","nerves","plaque","pre-molars","pulp-cavity","tooth decay"],"Year 5":["menstrual cycle","penis","puberty","testes","vagina"],"Year 6":["carbon monoxide","drugs"]},"Evolution and inheritance":{"Year 6":["adaptation","chromosomes","competition","DNA","dominant genes","evolution","evolutionary change","fossil records","genes","inherit","inheritance","natural selection","recessive genes","species","survival of the fittest"]},"Rocks":{"Year 3":["boulder","chalk","clay","cobble","crystals","fossil","grains","granite","granule","igneous","impermeable","lava","layers","limestone","magma","marble","metamorphic","mineral","organic","particles","pebble","permeable","porous","quartz","sand","sandstone","sedimentary","silt","slate","surface"]},"Everyday materials":{"Year 1":["bendy","boil","bright","burn","cloudy","dim","dull","freeze","glass","hard","material","melt","metal","object","plastic","rock","rough","see-through","shiny","smooth","soft","stiff","strong","water","waterproof","weak","wood"],"Year 2":["boiling point","elastic","flexible","function","gas","heat","liquid","man-made","molten","natural","pressure","property","purpose","reflection","rigid","rust","solid","suitable","transparent","useful"],"Year 3":["absorb","absorbent","artificial","characteristic","chemical","dissolve","opaque","powder","reflective","resources","texture","translucent"],"Year 4":["manufactured"]},"Properties and changes of materials":{"Year 5":["bicarbonate","buoyancy","change","combustion","conductor","conductivity","filter","filtrate","insulation","insulator","irreversible change","mixture","reaction","residue","reversible separation","soluble","solute","solution","solvent","suspension","thermal"]},"States of matter":{"Year 4":["boiling point","Celsius","change of state","condensation","degree","evaporation","freezing point","gas","gaseous","liquid","melting point","molecules","oxygen","precipitation","solid","solidify","waste","water cycle","water vapour"],"Year 5":["helium","hydrogen","oxidisation","solubility","sublimation"]},"Light":{"Year 3":["absorb","block","crescent moon","emit","gibbous moon","kaleidoscope","lens","light beam","light source","light wave","mirror","new moon","phases of moon","prism","quarter moon","reflect","solar system","spectrum","speed of light","sundial","wane","wax"],"Year 6":["concave","convex","cornea","iris","lens","optics","pupil","refraction","retina"]},"Sound":{"Year 4":["amplitude","auditory","decibel dynamic","echo","frequency","instruments","insulation","muffle","mute","noise","pitch","pollution","sound source","sound wave","soundproof","tone","tuning fork","vibrate","vibration","volume"],"Year 6":["transmission"]},"Forces and magnets":{"Year 1":["float","pull","push","sink","squash(ing)","stretch(ing)","twist(ing)"],"Year 3":["air resistance","aluminium","attract","bar magnet","brass","button magnet","compress","copper","force","force-meter","friction","gravity","horse-shoe magnet","iron","magnet","magnetic","Newton meter","nickel","non-magnetic","North pole","repel","ring magnet","South pole","spring","steel","streamlined"],"Year 5":["air resistance","cams","drag","forces","gears","levers","mechanisms","parachute","pulleys","surface resistance","transference","water resistance"]},"Seasonal changes":{"Year 1":["autumn","bright","cold","dark","darkness","day","dim","hot","ice","length","light","month","moon","movement","rain","rain gauge rainbow","seasons","shadow","snow","spring","summer","sun","sunlight","weather","wind","windsock","wind vane","winter","year"],"Year 2":["April","August","daily","December","equator","February","fortnight","January","July","June","March","May","monthly","November","October","poles","seasonal","September","weekly"]},"Earth and Space":{"Year 5":["asteroid","axis/axes","celestial body","comet","elliptical orbit","equator","galaxy","hemisphere","Jupiter","latitude","light year","longitude","Mars","Mercury","meteor","meteorite","Neptune","orbit","Pluto","prime Meridian","revolve","rotation","Saturn","sphere","spherical","spin","time zone","Uranus","Venus"],"Year 6":["astronomical","geocentric model of the universe","heliocentric model of the universe"]},"Electricity":{"Year 2":["electricity","mains"],"Year 4":["alligator clip","appliances","battery","bulb","buzzer","cell","circuit","close circuit","complete circuit","components","conductor","connection","crocodile clip","device","electrical","insulator","motor","negative","open circuit","positive","resister","switch","symbol","wire"],"Year 5":["conductivity","copper wire","current","dimmer switch","fuse","generator","parallel circuits","power","resistance","series circuits","simple circuits","socket","terminal","volts","voltage","wire"]}},"Writing":{"Terminology":{"Year 1":["capital letter","exclamation mark","full stop","joining word","letter","plural","punctuation","punctuation mark","question mark","sentence","singular"],"Year 2":["adjective","adverb","apostrophe","comma","command","compound","exclamation","homonym","homophone","joining","noun","noun phrase","question","simile","statement","suffix","tense (past, present)","verb","vocabulary"],"Year 3":["clause","conjunction","consonant","dialogue","inverted commas","prefix","preposition","preposition phrase","speech marks","sub-heading","subordinate clause","vowel","word family"],"Year 4":["1st person","2nd person","3rd person","adverbial","collective noun","common noun","determiner","metaphor","onomatopoeia","person","possessive pronoun","pronoun","proper noun","word class"],"Year 5":["abstract noun","ambiguity","bracket","cohesion","concrete noun","dash","figurative","formal","hyperbole","informal","literal","modal verb","modifiers","parenthesis","relative clause","relative pronoun","verb form"],"Year 6":["active","antonym","bullet points","cohesion","colon","coordinating conjunction","ellipsis","fluency","fluent","hyphen","object","passive","past progressive verb form","perfect verb form","personification","progressive verb form","semi-colon","stressed syllables","subject","subjunctive mood","subordinating conjunction","superlative","synonym","unstressed syllables"]},"Conjunctions":{"Year 1":["after that","first","now","on Tuesday/on Sunday etc.","one day","one night","soon","suddenly"],"Year 2":["as","because","if","or","that","until","when"],"Year 3":["after","although","before","however","therefore","unless","whenever","while","without warning"],"Year 4":["additionally","finally","in addition","in conclusion","meanwhile"],"Year 5":["despite","except","in comparison to","instead of"],"Year 6":["according to","consequently","if necessary","nevertheless","whereas"]},"Genre specific":{"Year 1":["beginning","book","character","poem","poetry","rhyme","story"],"Year 2":["alliteration","build up","introduction","problem","resolution","simile"],"Year 3":["dialogue","direct speech","heading","paragraph","sub-heading"],"Year 4":["imperative","rhetorical question"],"Year 5":["fact","opinion"]}}}
+</script>
+<script>
+const VOCAB = JSON.parse(document.getElementById('vocab-data').textContent);
+const YEARS = ['Year 1','Year 2','Year 3','Year 4','Year 5','Year 6'];
+
+const SUBJECT_META = {
+  'Art':        {label:'Art & design',        color:'#E94F7C', letter:'A'},
+  'Computing':  {label:'Computing',            color:'#4C6FFF', letter:'C'},
+  'DT':         {label:'Design & technology',  color:'#FF9F1C', letter:'D'},
+  'Geography':  {label:'Geography',            color:'#1DBFA3', letter:'G'},
+  'History':    {label:'History',              color:'#A66DD4', letter:'H'},
+  'Maths':      {label:'Maths',                color:'#2AA8D8', letter:'M'},
+  'Music':      {label:'Music',                color:'#F45B69', letter:'M'},
+  'PE':         {label:'PE',                   color:'#4FAF3D', letter:'P'},
+  'RE':         {label:'RE',                   color:'#C98A3B', letter:'R'},
+  'Science':    {label:'Science',              color:'#22B8CF', letter:'S'},
+  'Writing':    {label:'Writing',              color:'#FF6F91', letter:'W'}
+};
+const SUBJECT_ORDER = ['Art','Computing','DT','Geography','History','Maths','Music','PE','RE','Science','Writing'];
+
+const state = {
+  screen:'home',
+  subject:null,
+  year:'Year 3',
+  selectedTopics:new Set(),
+  numQuestions:8,
+  questions:[],
+  current:0,
+  score:0,
+  answers:[],
+  loadError:null,
+  playerName:'',
+  saved:false
+};
+
+const app = document.getElementById('app');
+
+function esc(s){
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function subjectTopicsForYear(subject, year){
+  const topics = VOCAB[subject] || {};
+  const out = [];
+  for(const topic in topics){
+    const words = topics[topic][year];
+    if(words && words.length){
+      out.push({topic, words});
+    }
+  }
+  return out;
+}
+
+function wordCountForSubject(subject){
+  let total = 0;
+  const topics = VOCAB[subject] || {};
+  for(const t in topics){
+    for(const y in topics[t]) total += topics[t][y].length;
+  }
+  return total;
+}
+
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function setScreen(screen){
+  state.screen = screen;
+  render();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function topBar(color){
+  return `
+  <div class="topbar">
+    <div class="brandmark">
+      <div class="mark" style="background:${color || 'var(--brand)'}">W</div>
+      <div class="title">Word Explorers</div>
+    </div>
+    <button class="ghost-btn" id="btn-history">My scores</button>
+  </div>`;
+}
+
+function renderHome(){
+  const tiles = SUBJECT_ORDER.map(key => {
+    const meta = SUBJECT_META[key];
+    const count = wordCountForSubject(key);
+    return `
+    <button class="tile" style="background:${meta.color}" data-subject="${key}">
+      <span class="letter">${meta.letter}</span>
+      <span>
+        <span class="name">${esc(meta.label)}</span><br>
+        <span class="count">${count} words</span>
+      </span>
+    </button>`;
+  }).join('');
+
+  app.innerHTML = `
+    ${topBar()}
+    <div class="hero">
+      <h1>Which subject shall we explore?</h1>
+      <p>Pick a subject, choose a year group, and take a quick quiz to see which words you already know.</p>
+    </div>
+    <div class="grid">${tiles}</div>
+  `;
+
+  app.querySelectorAll('.tile').forEach(btn => {
+    btn.addEventListener('click', () => {
+      state.subject = btn.dataset.subject;
+      state.selectedTopics = new Set();
+      state.loadError = null;
+      setScreen('setup');
+    });
+  });
+  document.getElementById('btn-history').addEventListener('click', () => setScreen('history'));
+}
+
+function renderSetup(){
+  const meta = SUBJECT_META[state.subject];
+  const color = meta.color;
+  const yearChips = YEARS.map(y => {
+    const has = subjectTopicsForYear(state.subject, y).length > 0;
+    const cls = ['chip'];
+    if(y === state.year) cls.push('selected');
+    if(!has) cls.push('empty');
+    return `<button class="${cls.join(' ')}" style="--subject-color:${color}" data-year="${y}" ${has ? '' : 'disabled'}>${y}</button>`;
+  }).join('');
+
+  const topicsAvail = subjectTopicsForYear(state.subject, state.year);
+  if(topicsAvail.length && state.selectedTopics.size === 0){
+    topicsAvail.forEach(t => state.selectedTopics.add(t.topic));
+  }
+  const topicChips = topicsAvail.map(t => {
+    const sel = state.selectedTopics.has(t.topic);
+    return `<button class="chip small ${sel ? 'selected' : ''}" style="--subject-color:${color}" data-topic="${esc(t.topic)}">${esc(t.topic)} (${t.words.length})</button>`;
+  }).join('');
+
+  const pool = topicsAvail.filter(t => state.selectedTopics.has(t.topic))
+    .flatMap(t => t.words);
+  const uniquePool = Array.from(new Set(pool.map(w => w.toLowerCase())));
+  const maxQ = Math.min(12, uniquePool.length);
+  const sizes = [5,8,12].filter(n => n <= maxQ);
+  if(sizes.length === 0 && uniquePool.length > 0) sizes.push(uniquePool.length);
+  if(!sizes.includes(state.numQuestions)) state.numQuestions = sizes[sizes.length - 1] || 0;
+
+  const sizeChips = sizes.map(n => `<button class="chip small ${n===state.numQuestions?'selected':''}" style="--subject-color:${color}" data-size="${n}">${n} words</button>`).join('');
+
+  app.innerHTML = `
+    ${topBar(color)}
+    <div class="hero">
+      <h1 style="color:${color}">${esc(meta.label)}</h1>
+      <p>Choose a year group and the topics you'd like to be quizzed on.</p>
+    </div>
+    <div class="card">
+      <div class="setup-row">
+        <p class="section-label">Year group</p>
+        <div class="chiprow">${yearChips}</div>
+      </div>
+      <div class="setup-row">
+        <p class="section-label">Topics</p>
+        <div class="chiprow">${topicChips || '<span class="empty-note">No topics for this year group yet.</span>'}</div>
+        ${topicsAvail.length ? `<div class="topic-actions">
+          <button class="textlink" id="topics-all">Select all</button>
+          <button class="textlink" id="topics-none">Clear</button>
+        </div>` : ''}
+      </div>
+      <div class="setup-row">
+        <p class="section-label">Quiz length</p>
+        <div class="chiprow">${sizeChips || '<span class="empty-note">Pick at least one topic first.</span>'}</div>
+      </div>
+      <p class="count-note">${uniquePool.length} word${uniquePool.length===1?'':'s'} available from your selection.</p>
+      ${state.loadError ? `<p class="error-text">${esc(state.loadError)}</p>` : ''}
+      <div class="cta-row">
+        <button class="cta" style="--subject-color:${color}" id="btn-start" ${uniquePool.length === 0 ? 'disabled' : ''}>Start quiz</button>
+        <button class="cta secondary" id="btn-back">Back</button>
+      </div>
+    </div>
+  `;
+
+  app.querySelectorAll('[data-year]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      state.year = btn.dataset.year;
+      state.selectedTopics = new Set();
+      render();
+    });
+  });
+  app.querySelectorAll('[data-topic]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const t = btn.dataset.topic;
+      if(state.selectedTopics.has(t)) state.selectedTopics.delete(t);
+      else state.selectedTopics.add(t);
+      render();
+    });
+  });
+  app.querySelectorAll('[data-size]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      state.numQuestions = Number(btn.dataset.size);
+      render();
+    });
+  });
+  const allBtn = document.getElementById('topics-all');
+  if(allBtn) allBtn.addEventListener('click', () => {
+    topicsAvail.forEach(t => state.selectedTopics.add(t.topic));
+    render();
+  });
+  const noneBtn = document.getElementById('topics-none');
+  if(noneBtn) noneBtn.addEventListener('click', () => {
+    state.selectedTopics.clear();
+    render();
+  });
+  document.getElementById('btn-back').addEventListener('click', () => setScreen('home'));
+  const startBtn = document.getElementById('btn-start');
+  if(startBtn) startBtn.addEventListener('click', () => startQuiz(uniquePool, topicsAvail));
+  document.getElementById('btn-history').addEventListener('click', () => setScreen('history'));
+}
+
+async function startQuiz(uniquePoolLower, topicsAvail){
+  const color = SUBJECT_META[state.subject].color;
+  const allWords = topicsAvail.filter(t => state.selectedTopics.has(t.topic)).flatMap(t => t.words.map(w => ({word:w, topic:t.topic})));
+  const seen = new Set();
+  const dedup = [];
+  allWords.forEach(item => {
+    const k = item.word.toLowerCase();
+    if(!seen.has(k)){ seen.add(k); dedup.push(item); }
+  });
+  const picked = shuffle(dedup).slice(0, state.numQuestions);
+
+  state.loadError = null;
+  setScreen('loading');
+
+  try{
+    const questions = await generateQuestions(picked, state.subject, state.year, color);
+    state.questions = questions;
+    state.current = 0;
+    state.score = 0;
+    state.answers = [];
+    setScreen('quiz');
+  }catch(err){
+    state.loadError = 'Could not build the quiz just then. Please try again.';
+    setScreen('setup');
+  }
+}
+
+function levelHint(year){
+  const n = Number(year.replace('Year ',''));
+  if(n <= 2) return 'Use very short, simple everyday words a 5-7 year old would understand. Definitions should be under 8 words.';
+  if(n <= 4) return 'Use simple, clear language suitable for a 7-9 year old. Definitions should be under 10 words.';
+  return 'Use clear language suitable for a 9-11 year old, can include slightly more precise vocabulary. Definitions should be under 12 words.';
+}
+
+async function generateQuestions(items, subject, year, color){
+  const subjectLabel = SUBJECT_META[subject].label;
+  const wordList = items.map(i => `${i.word} (topic: ${i.topic})`).join('; ');
+
+  const systemPrompt = `You write UK primary school vocabulary quiz questions for the subject "${subjectLabel}", ${year}. ${levelHint(year)} For every word given, return its correct pupil-friendly definition and exactly 3 plausible but wrong definitions (distractors), written in a similar style and length to the correct one so the correct answer isn't obvious from length or tone. Distractors should be believable, not silly. Respond with ONLY compact JSON, no markdown fences, no commentary, in this exact shape: [{"word":"...","correct":"...","distractors":["...","...","..."]}]. Keep every definition under the word limit given above. Return exactly one object per word given, in the order given.`;
+
+  // Calls our own serverless function (see /functions/api/generate-quiz.js) instead of
+  // Anthropic directly, so the API key never has to live in this page's JavaScript.
+  const response = await fetch("/api/generate-quiz", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({
+      system: systemPrompt,
+      userMessage: `Words: ${wordList}`
+    })
+  });
+
+  if(!response.ok){
+    const errText = await response.text().catch(() => '');
+    throw new Error('Quiz generation failed: ' + errText);
+  }
+
+  const data = await response.json();
+  let text = data.content.map(c => c.text || '').join('');
+  text = text.trim().replace(/^```json/i,'').replace(/^```/,'').replace(/```$/,'').trim();
+  const parsed = JSON.parse(text);
+
+  return parsed.map(q => {
+    const options = shuffle([q.correct, ...q.distractors]);
+    return {
+      word: q.word,
+      correct: q.correct,
+      options
+    };
+  }).filter(q => q.options.length === 4);
+}
+
+function renderLoading(){
+  const color = SUBJECT_META[state.subject].color;
+  app.innerHTML = `
+    ${topBar(color)}
+    <div class="loading-wrap">
+      <div class="spinner" style="--subject-color:${color}"></div>
+      <p>Building your quiz...</p>
+    </div>
+  `;
+  document.getElementById('btn-history').addEventListener('click', () => setScreen('history'));
+}
+
+function renderQuiz(){
+  const color = SUBJECT_META[state.subject].color;
+  const q = state.questions[state.current];
+  const total = state.questions.length;
+
+  const dots = state.questions.map((_, i) => {
+    let cls = 'dot';
+    if(i < state.current) cls += ' done';
+    else if(i === state.current) cls += ' current';
+    return `<span class="${cls}" style="${i <= state.current ? `background:${color}` : ''}"></span>`;
+  }).join('');
+
+  const answered = state.answers[state.current] !== undefined;
+
+  const optionsHtml = q.options.map((opt, i) => {
+    let extra = '';
+    if(answered){
+      const chosen = state.answers[state.current];
+      if(opt === q.correct) extra = ' correct';
+      else if(i === chosen) extra = ' wrong';
+    }
+    return `<button class="option${extra}" data-index="${i}" ${answered ? 'disabled' : ''}>
+      <span class="badge">${String.fromCharCode(65+i)}</span>
+      <span>${esc(opt)}</span>
+    </button>`;
+  }).join('');
+
+  let feedbackHtml = '';
+  if(answered){
+    const chosenIndex = state.answers[state.current];
+    const wasCorrect = q.options[chosenIndex] === q.correct;
+    feedbackHtml = `<div class="feedback ${wasCorrect ? 'good' : 'bad'}">${wasCorrect ? 'Nice one, that\'s right!' : 'Not quite — the correct meaning is highlighted above.'}</div>`;
+  }
+
+  app.innerHTML = `
+    ${topBar(color)}
+    <div class="quiz-top">
+      <div class="dots">${dots}</div>
+      <div class="score-pill">${state.score} / ${total}</div>
+    </div>
+    <div class="card">
+      <div class="quiz-word">
+        <div class="eyebrow">Question ${state.current + 1} of ${total} · what does this mean?</div>
+        <h2 style="color:${color}">${esc(q.word)}</h2>
+      </div>
+      <div class="options" style="--subject-color:${color}">${optionsHtml}</div>
+      ${feedbackHtml}
+      <div class="cta-row">
+        ${answered
+          ? `<button class="cta" style="--subject-color:${color}" id="btn-next">${state.current + 1 === total ? 'See my results' : 'Next word'}</button>`
+          : `<button class="cta secondary" id="btn-quit">Quit quiz</button>`}
+      </div>
+    </div>
+  `;
+
+  if(!answered){
+    app.querySelectorAll('.option').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const idx = Number(btn.dataset.index);
+        state.answers[state.current] = idx;
+        if(q.options[idx] === q.correct) state.score += 1;
+        render();
+      });
+    });
+    document.getElementById('btn-quit').addEventListener('click', () => setScreen('home'));
+  } else {
+    document.getElementById('btn-next').addEventListener('click', () => {
+      if(state.current + 1 < total){
+        state.current += 1;
+        render();
+      } else {
+        state.saved = false;
+        state.playerName = '';
+        setScreen('results');
+      }
+    });
+  }
+  document.getElementById('btn-history').addEventListener('click', () => setScreen('history'));
+}
+
+function starsSvg(n){
+  let out = '';
+  for(let i = 0; i < 3; i++){
+    const filled = i < n;
+    out += `<svg viewBox="0 0 24 24" fill="${filled ? 'var(--gold)' : 'none'}" stroke="${filled ? '#B8860B' : 'var(--line)'}" stroke-width="1.5">
+      <path d="M12 2l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z" stroke-linejoin="round"/>
+    </svg>`;
+  }
+  return out;
+}
+
+function renderResults(){
+  const color = SUBJECT_META[state.subject].color;
+  const total = state.questions.length;
+  const pct = total ? state.score / total : 0;
+  const stars = pct >= 0.9 ? 3 : pct >= 0.6 ? 2 : pct >= 0.3 ? 1 : 0;
+  let msg = 'Keep exploring — every word you learn counts!';
+  if(pct >= 0.9) msg = 'Amazing! You really know these words.';
+  else if(pct >= 0.6) msg = 'Great job — you know most of these words.';
+  else if(pct >= 0.3) msg = 'Good try — a few more goes and you\'ll have these nailed.';
+
+  const reviewItems = state.questions.map((q, i) => {
+    const chosenIndex = state.answers[i];
+    const ok = q.options[chosenIndex] === q.correct;
+    return `<div class="review-item">
+      <span class="w">${esc(q.word)}</span>
+      <span class="status ${ok ? 'ok' : 'no'}">${ok ? '✓' : '✕'}</span>
+    </div>`;
+  }).join('');
+
+  app.innerHTML = `
+    ${topBar(color)}
+    <div class="card">
+      <div class="results-hero">
+        <div class="stars">${starsSvg(stars)}</div>
+        <div class="big-score" style="color:${color}">${state.score} / ${total}</div>
+        <p class="results-msg">${msg}</p>
+      </div>
+      <div class="review-list">${reviewItems}</div>
+      ${!state.saved ? `
+      <div class="name-row">
+        <input type="text" id="name-input" placeholder="Your first name (optional)" maxlength="30">
+        <button class="cta secondary" id="btn-save">Save score</button>
+      </div>
+      ` : `<p class="saved-note">Score saved to My scores.</p>`}
+      <div class="cta-row">
+        <button class="cta" style="--subject-color:${color}" id="btn-again">Try again</button>
+        <button class="cta secondary" id="btn-newtopic">Choose new topic</button>
+      </div>
+    </div>
+  `;
+
+  const saveBtn = document.getElementById('btn-save');
+  if(saveBtn){
+    saveBtn.addEventListener('click', async () => {
+      const nameInput = document.getElementById('name-input');
+      state.playerName = nameInput.value.trim();
+      await saveResult();
+      state.saved = true;
+      render();
+    });
+  }
+  document.getElementById('btn-again').addEventListener('click', () => {
+    state.selectedTopics = new Set(state.selectedTopics);
+    setScreen('setup');
+  });
+  document.getElementById('btn-newtopic').addEventListener('click', () => {
+    state.selectedTopics = new Set();
+    setScreen('setup');
+  });
+  document.getElementById('btn-history').addEventListener('click', () => setScreen('history'));
+}
+
+function saveResult(){
+  try{
+    const existing = localStorage.getItem('vocab-history');
+    const list = existing ? JSON.parse(existing) : [];
+    list.unshift({
+      date: new Date().toISOString(),
+      subject: state.subject,
+      year: state.year,
+      score: state.score,
+      total: state.questions.length,
+      name: state.playerName || null
+    });
+    localStorage.setItem('vocab-history', JSON.stringify(list.slice(0, 100)));
+  }catch(err){
+    // localStorage can fail in private browsing with very low quotas; safe to ignore here
+  }
+}
+
+async function renderHistory(){
+  app.innerHTML = `
+    ${topBar()}
+    <div class="hero">
+      <h1>My scores</h1>
+      <p>Every quiz you've saved on this device.</p>
+    </div>
+    <div class="card">
+      <div id="history-list"><p class="empty-note">Loading...</p></div>
+    </div>
+    <div class="cta-row">
+      <button class="cta secondary" id="btn-home">Back to subjects</button>
+    </div>
+  `;
+  document.getElementById('btn-home').addEventListener('click', () => setScreen('home'));
+  document.getElementById('btn-history').addEventListener('click', () => {});
+
+  const listEl = document.getElementById('history-list');
+  try{
+    const existing = localStorage.getItem('vocab-history');
+    const list = existing ? JSON.parse(existing) : [];
+    if(list.length === 0){
+      listEl.innerHTML = '<p class="empty-note">No saved scores yet. Finish a quiz and tap Save score.</p>';
+      return;
+    }
+    listEl.innerHTML = list.map(item => {
+      const meta = SUBJECT_META[item.subject] || {label:item.subject, color:'#999', letter:'?'};
+      const d = new Date(item.date);
+      const dateStr = d.toLocaleDateString(undefined, {day:'numeric', month:'short'});
+      return `<div class="history-item">
+        <div class="h-left">
+          <div class="swatch" style="background:${meta.color}">${meta.letter}</div>
+          <div>
+            <div class="w" style="font-weight:700">${esc(meta.label)} · ${esc(item.year)}</div>
+            <div class="meta">${item.name ? esc(item.name) + ' · ' : ''}${dateStr}</div>
+          </div>
+        </div>
+        <div class="score">${item.score}/${item.total}</div>
+      </div>`;
+    }).join('');
+  }catch(err){
+    listEl.innerHTML = '<p class="empty-note">Could not load saved scores right now.</p>';
+  }
+}
+
+function render(){
+  if(state.screen === 'home') renderHome();
+  else if(state.screen === 'setup') renderSetup();
+  else if(state.screen === 'loading') renderLoading();
+  else if(state.screen === 'quiz') renderQuiz();
+  else if(state.screen === 'results') renderResults();
+  else if(state.screen === 'history') renderHistory();
+}
+
+render();
+</script>
+</body>
+</html>

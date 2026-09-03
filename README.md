@@ -29,20 +29,32 @@ Note: API usage here is billed separately from any Claude.ai subscription, pay-a
    ```
 
 ## 3. Connect it to Cloudflare Pages
-1. Go to https://pages.cloudflare.com and sign up (free, no card required).
-2. **Create a project → Connect to Git → select your repository.**
-3. Build settings: leave the build command empty and set the output directory to `/` (this is a plain static site, nothing to build).
-4. Click **Save and Deploy**. You'll get a live URL like `word-explorers.pages.dev` within a minute or two.
+Cloudflare's dashboard layout has changed — Pages now lives inside a combined **Workers & Pages** section, not its own icon.
+
+1. Go to https://dash.cloudflare.com and sign up (free, no card required) or log in.
+2. In the left sidebar, select **Workers & Pages**.
+3. Click **Create application**.
+4. Select the **Pages** tab, then **Import an existing Git repository**.
+5. Choose your GitHub account, authorize Cloudflare to access it, then select your repository.
+6. On the build settings screen: leave **Framework preset** as *None*, leave **Build command** blank, and set **Build output directory** to `/` (this is a plain static site — nothing needs building).
+
+   **If you see a "Deploy command" field instead of "Build output directory"**, Cloudflare has routed you into its newer unified Workers flow rather than classic Pages. This project includes a `wrangler.jsonc` file that tells that flow to treat it as a static Pages site — leave **Deploy command** as its default (`npx wrangler deploy`) and it should pick that config up automatically. If it still doesn't work, go back and explicitly choose the **Pages** tab (not **Workers**) when creating the application — that's the simpler path for this project and skips the deploy-command question altogether.
+7. Click **Save and Deploy**. You'll get a live URL like `word-explorers.pages.dev` within a minute or two.
+
+(If you'd rather skip GitHub entirely, step 4 also offers **Use direct upload** — you can drag and drop this whole folder instead. You'll just need to re-upload manually each time you make a change, rather than it updating automatically.)
+
+For Cloudflare's own always-current walkthrough with screenshots, see: https://developers.cloudflare.com/pages/get-started/
 
 ## 4. Add your API key
-1. In the Pages project, go to **Settings → Environment variables**.
-2. Add a variable: Name `ANTHROPIC_API_KEY`, Value = the key from step 1. Set it for both Production and Preview.
-3. Go to **Deployments** and redeploy (or just push a small change to the repo) so the function picks up the new variable.
+1. In your Pages project, go to **Settings**.
+2. Find **Variables and Secrets** (this used to be called "Environment variables" — Cloudflare renamed it in 2026).
+3. Select **Add**, choose type **Secret**, set the name to `ANTHROPIC_API_KEY`, and paste in the key from step 1.
+4. Save, then go to **Deployments** and redeploy (or push a small change to the repo) so the function picks up the new variable.
 
 That's it — the quiz-generation button will now work on your live site, and scores save locally in each pupil's/device's browser via `localStorage`.
 
 ## Optional: use a custom domain
-In the Pages project, **Custom domains → Set up a custom domain**, and follow the prompts if you own one (e.g. `vocab.yourschool.co.uk`). Not required — the free `.pages.dev` address works fine.
+In the Pages project, **Custom domains** tab → **Set up a custom domain**, and follow the prompts if you own one (e.g. `vocab.yourschool.co.uk`). Not required — the free `.pages.dev` address works fine.
 
 ## If something doesn't generate a quiz
 Open the browser dev tools (F12) → Console tab, and look for an error. The most common cause is the `ANTHROPIC_API_KEY` not being set yet, or not redeployed after adding it.

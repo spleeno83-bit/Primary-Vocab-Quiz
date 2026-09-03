@@ -48,13 +48,18 @@ async function handleGenerateQuiz(request, env) {
   }
 
   try {
+    const headers = {
+      "Content-Type": "application/json",
+      "x-api-key": env.ANTHROPIC_API_KEY,
+      "anthropic-version": "2023-06-01"
+    };
+    if (env.ANTHROPIC_WORKSPACE_ID) {
+      headers["anthropic-workspace-id"] = env.ANTHROPIC_WORKSPACE_ID;
+    }
+
     const anthropicResponse = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": env.ANTHROPIC_API_KEY,
-        "anthropic-version": "2023-06-01"
-      },
+      headers,
       body: JSON.stringify({
         model: "claude-sonnet-5",
         max_tokens: 1000,

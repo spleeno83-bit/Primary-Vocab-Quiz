@@ -714,8 +714,7 @@ async function generateQuestions(items, subject, year, color){
 
   const systemPrompt = `You write UK primary school vocabulary quiz questions for the subject "${subjectLabel}", ${year}. ${levelHint(year)} For every word given, return its correct pupil-friendly definition and exactly 3 plausible but wrong definitions (distractors), written in a similar style and length to the correct one so the correct answer isn't obvious from length or tone. Distractors should be believable, not silly. Respond with ONLY compact JSON, no markdown fences, no commentary, in this exact shape: [{"word":"...","correct":"...","distractors":["...","...","..."]}]. Keep every definition under the word limit given above. Return exactly one object per word given, in the order given.`;
 
-  // Calls our own serverless function (see /functions/api/generate-quiz.js) instead of
-  // Anthropic directly, so the API key never has to live in this page's JavaScript.
+  // Calls our own Worker (see /src/index.js) instead of Anthropic directly, so the API key never has to live in this page's JavaScript.
   const response = await fetch("/api/generate-quiz", {
     method: "POST",
     headers: {"Content-Type": "application/json"},

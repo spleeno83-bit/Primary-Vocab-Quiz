@@ -1,7 +1,12 @@
 {
 	"$schema": "./node_modules/wrangler/config-schema.json",
-	"name": "word-explorers",
-	"pages_build_output_dir": ".",
-	"compatibility_date": "2026-09-01",
-	"compatibility_flags": ["nodejs_compat"]
+	"name": "primary-vocab-quiz",
+	"main": "./src/index.js",
+	"compatibility_date": "2026-09-03",
+	"compatibility_flags": ["nodejs_compat"],
+	"assets": {
+		"directory": "./public",
+		"binding": "ASSETS",
+		"run_worker_first": ["/api/*"]
+	}
 }

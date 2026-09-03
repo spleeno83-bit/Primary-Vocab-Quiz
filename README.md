@@ -5,7 +5,6 @@ recommended setup, which is what your dashboard actually created for you
 (you'll see it under **Workers & Pages → your project → Workers service**,
 not under a separate "Pages" section).
 
-
 ```
 word-explorers-site/
 ├── public/
